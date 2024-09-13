@@ -12,20 +12,40 @@
 # Display all tickets or filter by status.
 # Initialize with some sample tickets and include functionality for additional ticket entry.
 
-def open_new_ticket(ticket, customer_name, issue, status=open):
+def open_new_ticket(ticket, customer_name, issue):
     ticket_key = "Ticket" + str(ticket)
-    service_tickets[ticket_key] = {"Customer": customer_name, "Issue": issue, "Status": status}
+    service_tickets[ticket_key] = {"Customer": customer_name, "Issue": issue, "Status": "open"}
     print(f"{customer_name}, your ticket has been opened for {issue}. Your ticket number is {ticket} Returning to the menu.")
 
 def update_ticket(ticket_number, status):
     try:
         service_tickets[ticket_number]["Status"] = status
     except:
-        print(f"Ticket number {ticket_number[6:]} was not found.") #TODO, continue from here.
-    print(service_tickets[ticket_number])
+        print(f"Ticket number {ticket_number[6:]} was not found.")
+    else:
+        print(f"Your ticket is now {status}.")
+    finally:
+        print("\nReturning to the menu.")
 
-def display_tickets(status=all):
-    pass #can filter by status
+def display_tickets(filter):
+    if filter == "yes":
+        ticket_status = input("Would you like to see open or closed tickets? (open/closed): ").lower()
+        if ticket_status == "open":
+            print("\nHere is the list of open tickets:")
+            for ticket_number, ticket in service_tickets.items():
+                if service_tickets[ticket_number]["Status"] == "open":
+                    print(f"Ticket number {ticket_number[6:]} for {service_tickets[ticket_number]["Customer"]}. Issue: {service_tickets[ticket_number]["Issue"]}")
+        elif ticket_status == "closed":
+            print("\nHere is the list of closed tickets:")
+            for ticket_number, ticket in service_tickets.items():
+                if service_tickets[ticket_number]["Status"] == "closed":
+                    print(f"Ticket number {ticket_number[6:]} for {service_tickets[ticket_number]["Customer"]}. Issue: {service_tickets[ticket_number]["Issue"]}")
+        else:
+            print("Invalid input.")
+    else: 
+        for ticket_number, ticket in service_tickets.items():
+            print(f"Ticket number {ticket_number[6:]} for {service_tickets[ticket_number]["Customer"]}. Issue: {service_tickets[ticket_number]["Issue"]}. Currently {service_tickets[ticket_number]["Status"]}.")
+    print("\nReturning to the menu.")
 
 
 service_tickets = {
@@ -33,31 +53,37 @@ service_tickets = {
     "Ticket2": {"Customer": "Bob", "Issue": "Payment issue", "Status": "closed"}
 }
 
-starting_ticket = 3   # Set the next ticket to be added
+next_ticket = 3   # Set the next ticket to be added, if ticket dictionary was empty would set this to 1.
 
 while True:
-    menu_action = input("Options:\n1. Open new ticket\n2. Update existing ticket\n3. Display current tickets\n4. Exit")
+    menu_action = input("\nOptions:\n1. Open new ticket\n2. Update existing ticket\n3. Display current tickets\n4. Exit\n")
     if menu_action == "1":
         customer_name = input("Please enter your first name: ").capitalize()
-        issue = input("Please enter a brief description of the issue you are experiencing: ").capitalize()
-        open_new_ticket(starting_ticket, customer_name, issue)
-        starting_ticket += 1
+        if customer_name.strip() == "":
+            print("No name was entered, returning to the menu.")
+        else:
+            issue = input("Please enter a brief description of the issue you are experiencing: ").capitalize()
+            if issue.strip() == "":
+                print("No issue was entered, returning to the menu.")
+            else:
+                open_new_ticket(next_ticket, customer_name, issue)
+                next_ticket += 1
     elif menu_action == "2":
         ticket_number = input("Please enter your ticket number: ")
-        # try:
-        #     ticket_number = int(ticket_number)
-        # except:
-        #     print("Invalid input.")
-        # else:
-        ticket_number = "Ticket" + ticket_number
-        print(f"Ticket entered was {ticket_number}")
-        status = input("Are you closing, or opening a ticket? (open/close): ").lower()
-        if status == "open" or "close": 
-            update_ticket(ticket_number, status)
+        if ticket_number.strip() == "":
+            print("No ticket number was entered, returning to the menu.")
         else:
-            print("Invalid input, please enter open or close. Returning to the menu.")
-    # elif menu_action == "3":
-    #     update_ticket(status)
+            ticket_number = "Ticket" + ticket_number
+            status = input("Are you closing, or opening a ticket? (open/close): ").lower()
+            if status == "open" or status == "close":  
+                if status == "close":
+                    status = "closed"              
+                update_ticket(ticket_number, status)
+            else:
+                print("Invalid input. Returning to the menu.")
+    elif menu_action == "3":
+        filter = input("Would you like to filter by ticket status? (yes/no): ")
+        display_tickets(filter)
     elif menu_action == "4":
         break
     else:
